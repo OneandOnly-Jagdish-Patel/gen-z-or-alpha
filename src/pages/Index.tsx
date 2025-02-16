@@ -2,10 +2,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Index = () => {
   const [birthDate, setBirthDate] = useState({
@@ -15,6 +21,22 @@ const Index = () => {
   });
   const [generation, setGeneration] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Generate arrays for dropdown options
+  const years = Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => 
+    (1900 + i).toString()
+  ).reverse();
+  
+  const months = Array.from({ length: 12 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: new Date(2000, i).toLocaleString('default', { month: 'long' })
+  }));
+  
+  const getDaysInMonth = (month: string, year: string) => {
+    if (!month || !year) return Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+    const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
+  };
 
   const determineGeneration = (year: number) => {
     if (year >= 1997 && year <= 2012) {
@@ -65,10 +87,17 @@ const Index = () => {
   };
 
   const handleDateChange = (field: 'year' | 'month' | 'day', value: string) => {
-    setBirthDate(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setBirthDate(prev => {
+      const newDate = { ...prev, [field]: value };
+      // Reset day if it's greater than the days in the selected month
+      if (field === 'month' || field === 'year') {
+        const daysInMonth = getDaysInMonth(newDate.month, newDate.year).length;
+        if (parseInt(newDate.day) > daysInMonth) {
+          newDate.day = "";
+        }
+      }
+      return newDate;
+    });
   };
 
   return (
@@ -96,42 +125,57 @@ const Index = () => {
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="month">Month</Label>
-                <Input
-                  id="month"
-                  type="number"
-                  placeholder="MM"
+                <Select
                   value={birthDate.month}
-                  onChange={(e) => handleDateChange('month', e.target.value)}
-                  min="1"
-                  max="12"
-                  className="text-lg py-6"
-                />
+                  onValueChange={(value) => handleDateChange('month', value)}
+                >
+                  <SelectTrigger id="month" className="text-lg py-6">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map(month => (
+                      <SelectItem key={month.value} value={month.value}>
+                        {month.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="day">Day</Label>
-                <Input
-                  id="day"
-                  type="number"
-                  placeholder="DD"
+                <Select
                   value={birthDate.day}
-                  onChange={(e) => handleDateChange('day', e.target.value)}
-                  min="1"
-                  max="31"
-                  className="text-lg py-6"
-                />
+                  onValueChange={(value) => handleDateChange('day', value)}
+                >
+                  <SelectTrigger id="day" className="text-lg py-6">
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getDaysInMonth(birthDate.month, birthDate.year).map(day => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="year">Year</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  placeholder="YYYY"
+                <Select
                   value={birthDate.year}
-                  onChange={(e) => handleDateChange('year', e.target.value)}
-                  min="1900"
-                  max={new Date().getFullYear()}
-                  className="text-lg py-6"
-                />
+                  onValueChange={(value) => handleDateChange('year', value)}
+                >
+                  <SelectTrigger id="year" className="text-lg py-6">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <Button
