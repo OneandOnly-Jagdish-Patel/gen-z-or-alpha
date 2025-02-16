@@ -72,7 +72,7 @@ const Index = () => {
               type="number"
               placeholder="Enter your birth year..."
               value={birthYear}
-              onChange={(e) => setBirthValue(e.target.value)}
+              onChange={(e) => setBirthYear(e.target.value)}
               className="text-lg py-6"
               min="1900"
               max={new Date().getFullYear()}
