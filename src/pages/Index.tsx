@@ -5,9 +5,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 
 const Index = () => {
-  const [birthYear, setBirthYear] = useState("");
+  const [birthDate, setBirthDate] = useState({
+    year: "",
+    month: "",
+    day: ""
+  });
   const [generation, setGeneration] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -21,14 +26,27 @@ const Index = () => {
     }
   };
 
+  const validateDate = (year: number, month: number, day: number) => {
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && 
+           date.getMonth() === month - 1 && 
+           date.getDate() === day;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const year = parseInt(birthYear);
+    const year = parseInt(birthDate.year);
+    const month = parseInt(birthDate.month);
+    const day = parseInt(birthDate.day);
     
-    if (!birthYear || isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+    if (!birthDate.year || !birthDate.month || !birthDate.day || 
+        isNaN(year) || isNaN(month) || isNaN(day) || 
+        year < 1900 || year > new Date().getFullYear() ||
+        month < 1 || month > 12 || day < 1 || day > 31 ||
+        !validateDate(year, month, day)) {
       toast({
-        title: "Invalid Year",
-        description: "Please enter a valid birth year.",
+        title: "Invalid Date",
+        description: "Please enter a valid birth date.",
         variant: "destructive",
       });
       return;
@@ -44,6 +62,13 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDateChange = (field: 'year' | 'month' | 'day', value: string) => {
+    setBirthDate(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -62,21 +87,53 @@ const Index = () => {
             Which Generation Are You?
           </h1>
           <p className="text-gray-600">
-            Enter your birth year to discover if you're Gen Z or Gen Alpha
+            Enter your birth date to discover if you're Gen Z or Gen Alpha
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="glass-card p-6 rounded-xl">
-            <Input
-              type="number"
-              placeholder="Enter your birth year..."
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              className="text-lg py-6"
-              min="1900"
-              max={new Date().getFullYear()}
-            />
+          <div className="glass-card p-6 rounded-xl space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="month">Month</Label>
+                <Input
+                  id="month"
+                  type="number"
+                  placeholder="MM"
+                  value={birthDate.month}
+                  onChange={(e) => handleDateChange('month', e.target.value)}
+                  min="1"
+                  max="12"
+                  className="text-lg py-6"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="day">Day</Label>
+                <Input
+                  id="day"
+                  type="number"
+                  placeholder="DD"
+                  value={birthDate.day}
+                  onChange={(e) => handleDateChange('day', e.target.value)}
+                  min="1"
+                  max="31"
+                  className="text-lg py-6"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="year">Year</Label>
+                <Input
+                  id="year"
+                  type="number"
+                  placeholder="YYYY"
+                  value={birthDate.year}
+                  onChange={(e) => handleDateChange('year', e.target.value)}
+                  min="1900"
+                  max={new Date().getFullYear()}
+                  className="text-lg py-6"
+                />
+              </div>
+            </div>
             <Button
               type="submit"
               className="w-full mt-4 py-6 text-lg font-medium transition-all duration-200 hover:scale-[1.02]"
