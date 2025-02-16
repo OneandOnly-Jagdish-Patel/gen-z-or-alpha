@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ const Index = () => {
     month: "",
     day: ""
   });
-  const [generation, setGeneration] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Generate arrays for dropdown options
@@ -76,7 +76,7 @@ const Index = () => {
 
     const result = determineGeneration(year);
     if (result) {
-      setGeneration(result);
+      navigate('/results', { state: { generation: result } });
     } else {
       toast({
         title: "Not Gen Z or Alpha",
@@ -186,28 +186,6 @@ const Index = () => {
             </Button>
           </div>
         </form>
-
-        {generation && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="mt-8 glass-card p-6 rounded-xl text-center"
-          >
-            <Badge
-              variant="secondary"
-              className="mb-4 text-lg px-4 py-1"
-            >
-              Result
-            </Badge>
-            <h2 className="text-3xl font-bold mb-4">You're {generation}!</h2>
-            <p className="text-gray-600">
-              {generation === "Gen Z"
-                ? "Born between 1997 and 2012, you're part of the digital native generation known for your tech-savvy nature and global mindset."
-                : "Born after 2012, you're part of the most technologically integrated generation, growing up with AI, smart devices, and immersive technology."}
-            </p>
-          </motion.div>
-        )}
       </motion.div>
     </div>
   );
