@@ -26,13 +26,16 @@ const Results = () => {
           initial={{
             opacity: 0,
             scale: 0,
-            x: Math.random() * window.innerWidth,
+            x: (window.innerWidth / particles.length) * i,
             y: window.innerHeight + 100,
           }}
           animate={{
             opacity: [0, 1, 1, 0],
             scale: [0, 1, 1, 0],
-            x: Math.random() * window.innerWidth,
+            x: [
+              (window.innerWidth / particles.length) * i,
+              (window.innerWidth / particles.length) * i + (Math.random() - 0.5) * 200,
+            ],
             y: -100,
           }}
           transition={{
